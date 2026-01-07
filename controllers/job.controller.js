@@ -257,15 +257,16 @@ const getJobCategory = (text) => {
     return null;
 };
 
-const calculateDetailedMatch = (userText, jobTitle, jobDesc) => {
+const calculateDetailedMatch = (userText, jobFullText) => {
     const userLower = userText.toLowerCase();
-    const titleLower = jobTitle.toLowerCase();
-    const descLower = jobDesc.toLowerCase();
-    const combined = titleLower + " " + descLower;
+    const combined = jobFullText.toLowerCase();
     
+    // Common stop words to ignore in matching to reduce noise
+    const stopWords = ['find', 'looking', 'for', 'job', 'with', 'in', 'at', 'under', 'below', 'above', 'salary', 'rs', 'rupees', 'lpa', 'ctc', 'per', 'month', 'year', 'an', 'a', 'the', 'is', 'are', 'am', 'i', 'we', 'need', 'want', 'urgent', 'hiring', 'candidate', 'role', 'work', 'opportunity', 'opening', 'date', 'posted', 'location', 'description'];
+
     // Extract words (length > 2)
     const userWords = userLower.match(/\b\w+\b/g) || [];
-    const cleanWords = userWords.filter(w => w.length > 2);
+    const cleanWords = userWords.filter(w => w.length > 1 && !stopWords.includes(w) && isNaN(w));
     
     if (cleanWords.length === 0) return 0;
     
@@ -366,16 +367,24 @@ export const aiMatchJobs = async (req, res) => {
                     return { score: 0, reasons: ['Salary does not match filter'], salaryFiltered: true };
                 }
                 
-                score += 5;
+                score += 15;
                 reasons.push(`Salary: ₹${job.salary.toLocaleString('en-IN')}`);
             }
 
-            const titleLower = (job.title || "").toLowerCase();
-            const descLower = (job.description || "").toLowerCase();
-            const combined = titleLower + " " + descLower;
+            // Construct full job text for searching (Title, Description, Location, Type, Experience, Availability)
+            const jobFullText = [
+                job.title,
+                job.description,
+                job.location,
+                job.jobType,
+                job.experienceLevel,
+                job.availability
+            ].filter(Boolean).join(" ");
+            
+            const combined = jobFullText.toLowerCase();
 
             // 1. TEXT MATCHING (30 points)
-            const textMatch = calculateDetailedMatch(textDescription, job.title || "", job.description || "");
+            const textMatch = calculateDetailedMatch(textDescription, jobFullText);
             score += Math.min(textMatch * 0.3, 30);
             if (textMatch > 30) {
                 reasons.push(`Text match: ${Math.round(textMatch)}%`);
@@ -491,6 +500,20 @@ export const aiMatchJobs = async (req, res) => {
                           (availLower.includes('immediate') || availLower.includes('asap'))) {
                     score += 3;
                     reasons.push(`Availability: ${job.availability}`);
+                }
+            }
+
+            // 8. RECENCY / DATE MATCHING (5 points)
+            if (job.createdAt) {
+                const daysOld = (new Date() - new Date(job.createdAt)) / (1000 * 60 * 60 * 24);
+                if (daysOld <= 3) {
+                    score += 5;
+                    reasons.push("Freshly posted");
+                } else if (daysOld <= 7) {
+                    score += 3;
+                    reasons.push("Posted this week");
+                } else if (daysOld <= 30) {
+                    score += 1;
                 }
             }
 
