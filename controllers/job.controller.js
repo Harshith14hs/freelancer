@@ -73,35 +73,6 @@ export const getAllJobs = async (req, res) => {
             })
             .sort({ createdAt: -1 });
 
-        // If no jobs are found and there was no specific keyword search, return sample jobs.
-        if (jobs.length === 0 && (!keyword || keyword.trim() === "")) {
-            const sampleJobs = [
-                {
-                    _id: "668b3e34a8e1a651f22a7c8a",
-                    title: "Senior React Developer",
-                    description: "Looking for a skilled React developer to build modern web applications.",
-                    availability: "Full-time",
-                    salary: 1200000,
-                    location: "Remote",
-                    jobType: "Full-time",
-                    experienceLevel: "Senior",
-                    postedBy: { fullname: "Tech Solutions Inc." }
-                },
-                {
-                    _id: "668b3e34a8e1a651f22a7c8b",
-                    title: "Node.js Backend Engineer",
-                    description: "Join our backend team to work on scalable and robust APIs.",
-                    availability: "Full-time",
-                    salary: 1000000,
-                    location: "New York",
-                    jobType: "Full-time",
-                    experienceLevel: "Mid-Level",
-                    postedBy: { fullname: "Data Systems LLC" }
-                }
-            ];
-            return res.status(200).json({ jobs: sampleJobs, success: true });
-        }
-
         return res.status(200).json({
             jobs,
             success: true
@@ -139,6 +110,10 @@ export const getJobById = async (req, res) => {
         return res.status(200).json({ job, success: true });
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            message: "Server error while fetching job by ID.",
+            success: false
+        });
     }
 }
 // freelanser gig dashboard

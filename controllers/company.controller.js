@@ -30,24 +30,26 @@ export const registerCompany = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            message: "Server error during company registration.",
+            success: false
+        });
     }
 }
 export const getCompany = async (req, res) => {
     try {
         const userId = req.id; // logged in user id
         const companies = await Company.find({ userId });
-        if (!companies) {
-            return res.status(404).json({
-                message: "Companies not found.",
-                success: false
-            })
-        }
         return res.status(200).json({
             companies,
             success:true
         })
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            message: "Server error while fetching companies.",
+            success: false
+        });
     }
 }
 // get company by id
@@ -67,6 +69,10 @@ export const getCompanyById = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            message: "Server error while fetching company by ID.",
+            success: false
+        });
     }
 }
 export const updateCompany = async (req, res) => {
@@ -99,5 +105,9 @@ export const updateCompany = async (req, res) => {
 
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            message: "Server error during company update.",
+            success: false
+        });
     }
 }
