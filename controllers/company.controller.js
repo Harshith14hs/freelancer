@@ -39,6 +39,12 @@ export const registerCompany = async (req, res) => {
 export const getCompany = async (req, res) => {
     try {
         const userId = req.id; // logged in user id
+        if (!userId) {
+            return res.status(400).json({
+                message: "User ID is missing.",
+                success: false
+            });
+        }
         const companies = await Company.find({ userId });
         return res.status(200).json({
             companies,
