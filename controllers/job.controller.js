@@ -249,7 +249,8 @@ const getJobCategory = (text) => {
     const textLower = text.toLowerCase();
     for (const [category, keywords] of Object.entries(jobCategories)) {
         for (const keyword of keywords) {
-            if (textLower.includes(keyword)) {
+            // Use word boundary to avoid partial matches (e.g., "ui" in "fruit")
+            if (new RegExp(`\\b${keyword}\\b`, 'i').test(textLower)) {
                 return category;
             }
         }
@@ -262,7 +263,7 @@ const calculateDetailedMatch = (userText, jobFullText) => {
     const combined = jobFullText.toLowerCase();
     
     // Common stop words to ignore in matching to reduce noise
-    const stopWords = ['find', 'looking', 'for', 'job', 'with', 'in', 'at', 'under', 'below', 'above', 'salary', 'rs', 'rupees', 'lpa', 'ctc', 'per', 'month', 'year', 'an', 'a', 'the', 'is', 'are', 'am', 'i', 'we', 'need', 'want', 'urgent', 'hiring', 'candidate', 'role', 'work', 'opportunity', 'opening', 'date', 'posted', 'location', 'description'];
+    const stopWords = ['find', 'looking', 'for', 'job', 'with', 'in', 'at', 'under', 'below', 'above', 'salary', 'rs', 'rupees', 'lpa', 'ctc', 'per', 'month', 'year', 'an', 'a', 'the', 'is', 'are', 'am', 'i', 'we', 'need', 'want', 'urgent', 'hiring', 'candidate', 'role', 'work', 'opportunity', 'opening', 'date', 'posted', 'location', 'description', 'to', 'on', 'it', 'if', 'or', 'of', 'as', 'be', 'by', 'do', 'up', 'so', 'no', 'not', 'but', 'and', 'all', 'any', 'my', 'me', 'us', 'our', 'your', 'you', 'he', 'she', 'him', 'her', 'they', 'them', 'this', 'that', 'these', 'those', 'which', 'who', 'whom', 'whose', 'where', 'when', 'why', 'how', 'what'];
 
     // Extract words (length > 2)
     const userWords = userLower.match(/\b\w+\b/g) || [];
@@ -272,7 +273,8 @@ const calculateDetailedMatch = (userText, jobFullText) => {
     
     let matches = 0;
     for (const word of cleanWords) {
-        if (combined.includes(word)) {
+        // Use word boundary to avoid partial matches
+        if (new RegExp(`\\b${word}\\b`, 'i').test(combined)) {
             matches++;
         }
     }
