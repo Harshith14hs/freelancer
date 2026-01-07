@@ -2,7 +2,6 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
-import fs from "fs";
 import dotenv from "dotenv";
 import connectDB from "./utils/db.js";
 import userRoute from "./routes/user.route.js";
@@ -49,23 +48,6 @@ app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 app.use("/api/v1/review", reviewRoute);
 app.use("/api/v1/payment", paymentRoute);
-
-// Serve frontend static files (dist folder from build)
-const frontendDistPath = path.join(__dirname, '../frontend/dist');
-if (!fs.existsSync(frontendDistPath)) {
-    console.error("Frontend dist folder not found at:", frontendDistPath);
-}
-app.use(express.static(frontendDistPath));
-
-// SPA fallback: Serve index.html for all non-API routes (enables client-side routing)
-app.get('*', (req, res) => {
-    res.sendFile(path.join(frontendDistPath, 'index.html'), (err) => {
-        if (err) {
-            console.log(err);
-            res.status(500).send("Frontend build not found. Please check your deployment build commands.");
-        }
-    });
-});
 
 app.listen(PORT, () => {
     connectDB();
