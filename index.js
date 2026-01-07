@@ -48,6 +48,15 @@ app.use("/api/v1/application", applicationRoute);
 app.use("/api/v1/review", reviewRoute);
 app.use("/api/v1/payment", paymentRoute);
 
+// Serve frontend static files (dist folder from build)
+const frontendDistPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendDistPath));
+
+// SPA fallback: Serve index.html for all non-API routes (enables client-side routing)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+});
+
 app.listen(PORT, () => {
     connectDB();
     console.log(`Server running in ${NODE_ENV} mode at port ${PORT}`);
