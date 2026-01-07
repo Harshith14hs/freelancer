@@ -26,17 +26,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Serve static files from the 'public' directory
+app.use("/public", express.static(path.join(__dirname, 'public')));
+
+const PORT = process.env.PORT || 8000;
+const NODE_ENV = process.env.NODE_ENV || "development";
+
+const corsOrigin = process.env.FRONTEND_URL || "http://localhost:5173";
 const corsOptions = {
-    origin: "http://localhost:5173",
+    origin: corsOrigin,
     credentials: true,
 };
 
 app.use(cors(corsOptions));
-
-// Serve static files from the 'public' directory
-app.use("/public", express.static(path.join(__dirname, 'public')));
-
-const PORT =  8000;
 
 // api's
 app.use("/api/v1/user", userRoute);
@@ -48,5 +50,5 @@ app.use("/api/v1/payment", paymentRoute);
 
 app.listen(PORT, () => {
     connectDB();
-    console.log(`Server running at port ${PORT}`);
+    console.log(`Server running in ${NODE_ENV} mode at port ${PORT}`);
 });
