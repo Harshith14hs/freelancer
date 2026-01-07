@@ -36,6 +36,9 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 const corsOrigin = [process.env.FRONTEND_URL, "http://localhost:5173"]
     .filter(Boolean)
     .map(url => url.replace(/\/$/, "")); // Remove trailing slash if present
+
+console.log("Allowed CORS Origins:", corsOrigin);
+
 const corsOptions = {
     origin: corsOrigin,
     credentials: true,
@@ -56,6 +59,14 @@ app.get("/", (req, res) => {
     return res.status(200).json({
         message: "Welcome to the Freelancer Platform API",
         success: true
+    });
+});
+
+// Catch-all for undefined routes (404) to prevent HTML responses for API errors
+app.use((req, res) => {
+    return res.status(404).json({
+        message: "API route not found",
+        success: false
     });
 });
 

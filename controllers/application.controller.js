@@ -1,5 +1,6 @@
 import { Application } from "../models/application.model.js";
 import { Job } from "../models/job.model.js";
+import { Review } from "../models/review.model.js";
 
 export const applyJob = async (req, res) => {
     try {
@@ -43,6 +44,7 @@ export const applyJob = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
+        return res.status(500).json({ message: "Server error.", success: false });
     }
 };
 export const getAppliedJobs = async (req,res) => {
@@ -57,18 +59,13 @@ export const getAppliedJobs = async (req,res) => {
                 options:{sort:{createdAt:-1}},
             }
         });
-        if(!application || application.length === 0){
-            return res.status(404).json({
-                message:"No Applications",
-                success:false
-            })
-        };
         return res.status(200).json({
             applications: application,
             success:true
         })
     } catch (error) {
         console.log(error);
+        return res.status(500).json({ message: "Server error.", success: false });
     }
 }
 // admin dekhega kitna user ne apply kiya hai
@@ -90,10 +87,11 @@ export const getApplicants = async (req,res) => {
         };
         return res.status(200).json({
             job, 
-            succees:true
+            success:true
         });
     } catch (error) {
         console.log(error);
+        return res.status(500).json({ message: "Server error.", success: false });
     }
 }
 export const updateStatus = async (req,res) => {
@@ -127,6 +125,7 @@ export const updateStatus = async (req,res) => {
 
     } catch (error) {
         console.log(error);
+        return res.status(500).json({ message: "Server error.", success: false });
     }
 }
 
@@ -235,7 +234,6 @@ export const getRecruiterHiredApplicants = async (req, res) => {
         .lean();
 
         // Fetch review information for each application
-        const Review = require('../models/review.model.js').Review;
         const applicationsWithReviews = await Promise.all(
             applications.map(async (app) => {
                 const review = await Review.findOne({ application: app._id }).lean();
