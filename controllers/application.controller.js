@@ -57,7 +57,7 @@ export const getAppliedJobs = async (req,res) => {
                 options:{sort:{createdAt:-1}},
             }
         });
-        if(!application){
+        if(!application || application.length === 0){
             return res.status(404).json({
                 message:"No Applications",
                 success:false

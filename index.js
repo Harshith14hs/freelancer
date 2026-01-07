@@ -33,7 +33,9 @@ app.use("/public", express.static(path.join(__dirname, 'public')));
 const PORT = process.env.PORT || 8000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 
-const corsOrigin = [process.env.FRONTEND_URL, "http://localhost:5173"].filter(Boolean);
+const corsOrigin = [process.env.FRONTEND_URL, "http://localhost:5173"]
+    .filter(Boolean)
+    .map(url => url.replace(/\/$/, "")); // Remove trailing slash if present
 const corsOptions = {
     origin: corsOrigin,
     credentials: true,
@@ -48,6 +50,14 @@ app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 app.use("/api/v1/review", reviewRoute);
 app.use("/api/v1/payment", paymentRoute);
+
+// Root route to verify server is running
+app.get("/", (req, res) => {
+    return res.status(200).json({
+        message: "Welcome to the Freelancer Platform API",
+        success: true
+    });
+});
 
 app.listen(PORT, () => {
     connectDB();

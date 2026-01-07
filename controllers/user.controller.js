@@ -16,17 +16,9 @@ export const register = async (req, res) => {
             });
         };
         const file = req.file;
-        const fileUri = getDataUri(file);
-
-        if (file && !fileUri) {
-            return res.status(400).json({
-                message: "Unable to process uploaded file.",
-                success: false,
-            });
-        }
-
         let cloudResponse;
-        if (fileUri) {
+        if (file) {
+            const fileUri = getDataUri(file);
             cloudResponse = await cloudinary.uploader.upload(fileUri.content);
         }
 
@@ -137,17 +129,10 @@ export const updateProfile = async (req, res) => {
         const { fullname, email, phoneNumber, bio, skills } = req.body;
         
         const file = req.file;
-        const fileUri = getDataUri(file);
         let cloudResponse;
-
-        if (file && !fileUri) {
-            return res.status(400).json({
-                message: "Unable to process uploaded file.",
-                success: false,
-            });
-        }
-
-        if (fileUri) {
+        
+        if (file) {
+            const fileUri = getDataUri(file);
             cloudResponse = await cloudinary.uploader.upload(fileUri.content);
         }
 
