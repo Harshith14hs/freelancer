@@ -2,6 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
+import fs from "fs";
 import dotenv from "dotenv";
 import connectDB from "./utils/db.js";
 import userRoute from "./routes/user.route.js";
@@ -20,6 +21,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.set('trust proxy', 1); // Required for secure cookies on Render/Heroku
 
 // middleware
 app.use(express.json());
@@ -32,7 +34,7 @@ app.use("/public", express.static(path.join(__dirname, 'public')));
 const PORT = process.env.PORT || 8000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 
-const corsOrigin = process.env.FRONTEND_URL || "http://localhost:5173";
+const corsOrigin = [process.env.FRONTEND_URL, "http://localhost:5173"].filter(Boolean);
 const corsOptions = {
     origin: corsOrigin,
     credentials: true,
@@ -50,11 +52,19 @@ app.use("/api/v1/payment", paymentRoute);
 
 // Serve frontend static files (dist folder from build)
 const frontendDistPath = path.join(__dirname, '../frontend/dist');
+if (!fs.existsSync(frontendDistPath)) {
+    console.error("Frontend dist folder not found at:", frontendDistPath);
+}
 app.use(express.static(frontendDistPath));
 
 // SPA fallback: Serve index.html for all non-API routes (enables client-side routing)
 app.get('*', (req, res) => {
-    res.sendFile(path.resolve(frontendDistPath, 'index.html'));
+    res.sendFile(path.join(frontendDistPath, 'index.html'), (err) => {
+        if (err) {
+            console.log(err);
+            res.status(500).send("Frontend build not found. Please check your deployment build commands.");
+        }
+    });
 });
 
 app.listen(PORT, () => {

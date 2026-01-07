@@ -146,12 +146,6 @@ export const getFreelancerJobs = async (req, res) => {
     try {
         const freelancerId = req.id;
         const jobs = await Job.find({ postedBy: freelancerId }).sort({ createdAt: -1 });
-        if (!jobs || jobs.length === 0) {
-            return res.status(404).json({
-                message: "Gigs not found.",
-                success: false
-            });
-        }
         return res.status(200).json({
             jobs,
             success: true
