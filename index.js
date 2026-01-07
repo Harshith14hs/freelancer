@@ -54,7 +54,7 @@ app.use(express.static(frontendDistPath));
 
 // SPA fallback: Serve index.html for all non-API routes (enables client-side routing)
 app.get('*', (req, res) => {
-    res.sendFile(path.join(frontendDistPath, 'index.html'));
+    res.sendFile(path.resolve(frontendDistPath, 'index.html'));
 });
 
 app.listen(PORT, () => {
